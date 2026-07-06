@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<title>Il Mio Allenamento</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#14181C">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Allenamento">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/icon-192.png">
+
+<style>
+  :root{
+    --bg: #14181C;
+    --card: #1D242B;
+    --card-2: #232B33;
+    --border: #2B333C;
+    --text: #EDECE8;
+    --muted: #8A929B;
+    --accent: #E8A33D;
+    --accent-dim: #6b5228;
+    --good: #6FBF8B;
+    --bad: #D9705F;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:var(--sans);}
+  body{ padding-bottom: 84px; min-height:100vh; }
+  .wrap{ max-width:560px; margin:0 auto; padding:20px 16px 8px; }
+
+  .topbar{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:18px; }
+  .topbar h1{ font-size:20px; letter-spacing:0.02em; margin:0; font-weight:800; }
+  .topbar .sub{ color:var(--muted); font-size:12px; font-family:var(--mono); }
+
+  .card{ background:var(--card); border:1px solid var(--border); border-radius:14px; padding:16px; margin-bottom:14px; }
+  .card h2{ font-size:13px; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); margin:0 0 10px; font-weight:700;}
+
+  .hero{
+    background: linear-gradient(160deg, #232B33 0%, #1A2026 100%);
+    border:1px solid var(--border); border-radius:16px; padding:20px;
+    margin-bottom:14px; position:relative; overflow:hidden;
+  }
+  .hero .label{ color:var(--muted); font-size:12px; font-family:var(--mono); text-transform:uppercase; letter-spacing:0.1em;}
+  .hero .big{ font-size:28px; font-weight:800; margin:4px 0 2px; }
+  .hero .detail{ color:var(--muted); font-size:13px; }
+  .plates{ position:absolute; right:-10px; top:-10px; display:flex; gap:6px; opacity:0.5;}
+  .plate{ width:46px; height:46px; border-radius:50%; border:6px solid var(--accent-dim);}
+
+  .row-btns{ display:flex; gap:10px; margin-top:16px; }
+  .btn{
+    flex:1; text-align:center; padding:14px 10px; border-radius:12px; border:1px solid var(--border);
+    background:var(--card-2); color:var(--text); font-weight:700; font-size:14px; cursor:pointer;
+    transition: transform .05s ease, background .15s ease;
+  }
+  .btn:active{ transform: scale(0.97); }
+  .btn.primary{ background:var(--accent); color:#241a05; border-color:var(--accent); }
+  .btn.ghost{ background:transparent; }
+  .btn.small{ font-size:12px; padding:10px 8px; flex:none; }
+
+  .tabbar{
+    position:fixed; bottom:0; left:0; right:0; background:#11151A; border-top:1px solid var(--border);
+    display:flex; padding:6px 6px calc(6px + env(safe-area-inset-bottom)); z-index:10;
+  }
+  .tab{ flex:1; text-align:center; padding:8px 2px; color:var(--muted); font-size:11px; font-weight:700; border-radius:10px; cursor:pointer; letter-spacing:0.02em; }
+  .tab.active{ color:var(--accent); background:rgba(232,163,61,0.08); }
+  .tab .ic{ display:block; font-size:18px; margin-bottom:2px; }
+
+  .view{ display:none; } .view.active{ display:block; }
+
+  .scheda-pick{ display:flex; gap:8px; margin-bottom:16px; }
+  .scheda-pill{ flex:1; text-align:center; padding:10px 6px; border-radius:10px; border:1px solid var(--border); background:var(--card); font-weight:800; font-size:13px; color:var(--muted); cursor:pointer; }
+  .scheda-pill.on{ background:var(--accent); color:#241a05; border-color:var(--accent);}
+
+  .exercise{ border-bottom:1px solid var(--border); padding:14px 0; }
+  .exercise:last-child{ border-bottom:none; }
+  .ex-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:8px;}
+  .ex-name{ font-weight:700; font-size:15px; line-height:1.3; }
+  .ex-target{ color:var(--muted); font-size:12px; font-family:var(--mono); margin-top:2px;}
+  .ex-last{ color: var(--accent); font-size:11px; font-family:var(--mono); text-align:right; white-space:nowrap;}
+
+  .ex-inputs{ display:flex; gap:8px; margin-top:10px; }
+  .field{ flex:1; }
+  .field label{ display:block; font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;}
+  .field input{ width:100%; background:var(--card-2); border:1px solid var(--border); border-radius:8px; padding:10px 8px; color:var(--text); font-size:16px; font-family:var(--mono); text-align:center; }
+  .field input:focus{ outline:none; border-color:var(--accent); }
+
+  .toast{
+    position:fixed; bottom:90px; left:50%; transform:translateX(-50%);
+    background:var(--good); color:#0d2015; font-weight:700; font-size:13px;
+    padding:10px 18px; border-radius:20px; opacity:0; pointer-events:none; transition:opacity .25s ease, transform .25s ease;
+    white-space:nowrap;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(-6px); }
+
+  .session-item{ display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--border); }
+  .session-item:last-child{ border-bottom:none; }
+  .session-date{ font-weight:700; font-size:14px; }
+  .session-meta{ color:var(--muted); font-size:12px; font-family:var(--mono);}
+  .session-badge{ font-size:11px; font-weight:800; padding:4px 8px; border-radius:6px; background:var(--card-2); color:var(--accent); }
+  .empty{ color:var(--muted); font-size:13px; text-align:center; padding:24px 8px; }
+
+  .note-input{ width:100%; background:var(--card-2); border:1px solid var(--border); border-radius:8px; padding:10px; color:var(--text); font-size:14px; font-family:var(--sans); resize:none; margin-top:6px; }
+  .note-input:focus{ outline:none; border-color:var(--accent); }
+
+  .delete-x{ color: var(--bad); font-size:12px; font-weight:700; cursor:pointer; padding:6px 4px;}
+  .install-banner{
+    display:none; background:var(--card-2); border:1px dashed var(--accent); border-radius:12px;
+    padding:12px 14px; margin-bottom:14px; font-size:13px; color:var(--text);
+  }
+  .install-banner b{ color: var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="topbar">
+    <h1>💪 Il Mio Allenamento</h1>
+    <span class="sub" id="todayDate"></span>
+  </div>
+
+  <div class="install-banner" id="installBanner">
+    📲 Puoi installare quest'app: apri il menu del browser e scegli <b>"Aggiungi a schermata Home"</b>.
+  </div>
+
+  <div class="view active" id="view-home">
+    <div class="hero">
+      <div class="plates"><div class="plate"></div><div class="plate"></div></div>
+      <div class="label">Ultimo allenamento</div>
+      <div class="big" id="lastWorkoutBig">Nessuno ancora</div>
+      <div class="detail" id="lastWorkoutDetail">Registra la tua prima sessione per iniziare</div>
+      <div class="row-btns">
+        <div class="btn primary" onclick="goToScheda(nextScheda())">Allenati oggi →</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Prossima seduta suggerita</h2>
+      <div id="nextSuggest" style="font-size:14px;"></div>
+    </div>
+
+    <div class="card">
+      <h2>Vai a una scheda</h2>
+      <div class="scheda-pick">
+        <div class="scheda-pill" onclick="goToScheda('A')">Scheda A</div>
+        <div class="scheda-pill" onclick="goToScheda('B')">Scheda B</div>
+        <div class="scheda-pill" onclick="goToScheda('C')">Scheda C</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Backup dati</h2>
+      <div style="font-size:12px; color:var(--muted); margin-bottom:10px;">
+        I dati restano solo su questo telefono/browser. Esporta un backup ogni tanto, specialmente prima di cambiare telefono.
+      </div>
+      <div class="row-btns">
+        <div class="btn small" onclick="exportBackup()">⬇ Esporta backup</div>
+        <div class="btn small" onclick="document.getElementById('importFile').click()">⬆ Importa backup</div>
+      </div>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importBackup(event)">
+    </div>
+  </div>
+
+  <div class="view" id="view-scheda">
+    <div class="scheda-pick" id="schedaSwitcher"></div>
+    <div class="card">
+      <h2 id="schedaTitle">Scheda</h2>
+      <div id="exerciseList"></div>
+    </div>
+    <div class="card">
+      <h2>Note sulla sessione (opzionale)</h2>
+      <textarea class="note-input" id="sessionNote" rows="2" placeholder="Come ti sei sentito? Dolori? Energia?"></textarea>
+    </div>
+    <div class="row-btns">
+      <div class="btn primary" onclick="saveSession()">✓ Salva allenamento di oggi</div>
+    </div>
+  </div>
+
+  <div class="view" id="view-storico">
+    <div class="card">
+      <h2>Storico allenamenti</h2>
+      <div id="historyList"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">Allenamento salvato</div>
+
+<div class="tabbar">
+  <div class="tab active" data-tab="home" onclick="switchTab('home')"><span class="ic">🏠</span>Home</div>
+  <div class="tab" data-tab="scheda" onclick="switchTab('scheda')"><span class="ic">🏋️</span>Allena</div>
+  <div class="tab" data-tab="storico" onclick="switchTab('storico')"><span class="ic">📋</span>Storico</div>
+</div>
+
+<script>
+// ---------------- DATA ----------------
+const SCHEDE = {
+  A: { title: "Scheda A — Gambe + Push + Core", exercises: [
+      {id:"a1", name:"Leg press (o squat multipower)", target:"4 x 10-12", unit:"kg"},
+      {id:"a2", name:"Panca piana bilanciere/manubri", target:"4 x 8-10", unit:"kg"},
+      {id:"a3", name:"Leg curl seduto/sdraiato", target:"3 x 12", unit:"kg"},
+      {id:"a4", name:"Lat machine avanti (presa larga)", target:"3 x 10-12", unit:"kg"},
+      {id:"a5", name:"Cable crunch", target:"3 x 15", unit:"kg"},
+      {id:"a6", name:"Plank frontale", target:"3 x 30-45\"", unit:"sec"},
+  ]},
+  B: { title: "Scheda B — Catena posteriore + Trazioni + Core", exercises: [
+      {id:"b1", name:"Hip thrust con bilanciere", target:"4 x 10-12", unit:"kg"},
+      {id:"b2", name:"Lat machine / trazioni", target:"4 x 8-10", unit:"kg"},
+      {id:"b3", name:"Affondi con manubri", target:"3 x 10/gamba", unit:"kg"},
+      {id:"b4", name:"Rematore bilanciere panca inclinata", target:"3 x 10-12", unit:"kg"},
+      {id:"b5", name:"Pallof press al cavo", target:"3 x 10/lato", unit:"kg"},
+      {id:"b6", name:"Plank laterale", target:"3 x 25-35\"", unit:"sec"},
+  ]},
+  C: { title: "Scheda C — Full body + Stabilità lombare", exercises: [
+      {id:"c1", name:"Stacco rumeno (RDL)", target:"4 x 8-10", unit:"kg"},
+      {id:"c2", name:"Shoulder press manubri", target:"3 x 10-12", unit:"kg"},
+      {id:"c3", name:"Lat machine stretta / rematore basso", target:"3 x 10-12", unit:"kg"},
+      {id:"c4", name:"Curl bicipiti", target:"3 x 12", unit:"kg"},
+      {id:"c5", name:"Push down tricipiti", target:"3 x 12", unit:"kg"},
+      {id:"c6", name:"Dead bug con zavorra", target:"3 x 10/lato", unit:"kg"},
+      {id:"c7", name:"Ab wheel / crunch inverso", target:"3 x 10-12", unit:"-"},
+  ]}
+};
+const ORDER = ["A","B","C"];
+const STORAGE_KEY = "allenamento_sessions_v1";
+
+let sessions = [];
+let currentScheda = "A";
+
+// ---------------- STORAGE (localStorage — 100% offline, nessun server) ----------------
+function loadSessions(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    sessions = raw ? JSON.parse(raw) : [];
+  }catch(e){ sessions = []; }
+}
+function persistSessions(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
+  }catch(e){ console.error('Errore salvataggio', e); }
+}
+
+// ---------------- BACKUP ----------------
+function exportBackup(){
+  const blob = new Blob([JSON.stringify(sessions, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const stamp = new Date().toISOString().slice(0,10);
+  a.href = url; a.download = `backup-allenamento-${stamp}.json`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast("⬇ Backup esportato");
+}
+function importBackup(evt){
+  const file = evt.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const parsed = JSON.parse(reader.result);
+      if(!Array.isArray(parsed)) throw new Error("formato non valido");
+      sessions = parsed;
+      persistSessions();
+      renderHome(); renderScheda(); renderStorico();
+      showToast("⬆ Backup importato");
+    }catch(e){
+      alert("File non valido. Assicurati di selezionare un backup esportato da questa app.");
+    }
+  };
+  reader.readAsText(file);
+  evt.target.value = "";
+}
+
+// ---------------- HELPERS ----------------
+function fmtDate(d){ return new Date(d).toLocaleDateString('it-IT', {day:'numeric', month:'short', year:'numeric'}); }
+function daysAgo(d){
+  const diff = Math.floor((Date.now() - new Date(d).getTime()) / 86400000);
+  if(diff <= 0) return "oggi";
+  if(diff === 1) return "ieri";
+  return diff + " giorni fa";
+}
+function lastWeightFor(exId){
+  for(let i = sessions.length - 1; i >= 0; i--){
+    const s = sessions[i];
+    if(s.entries && s.entries[exId] && s.entries[exId].weight){
+      return { weight: s.entries[exId].weight, reps: s.entries[exId].reps, date: s.date };
+    }
+  }
+  return null;
+}
+function nextScheda(){
+  if(sessions.length === 0) return "A";
+  const last = sessions.reduce((a,b) => new Date(a.date) > new Date(b.date) ? a : b);
+  const idx = ORDER.indexOf(last.scheda);
+  return ORDER[(idx + 1) % ORDER.length];
+}
+
+// ---------------- RENDER: HOME ----------------
+function renderHome(){
+  const sorted = [...sessions].sort((a,b) => new Date(b.date) - new Date(a.date));
+  const last = sorted[0];
+  if(last){
+    document.getElementById('lastWorkoutBig').textContent = "Scheda " + last.scheda + " — " + daysAgo(last.date);
+    document.getElementById('lastWorkoutDetail').textContent = fmtDate(last.date) + (last.note ? " · " + last.note : "");
+  } else {
+    document.getElementById('lastWorkoutBig').textContent = "Nessuno ancora";
+    document.getElementById('lastWorkoutDetail').textContent = "Registra la tua prima sessione per iniziare";
+  }
+  const next = nextScheda();
+  document.getElementById('nextSuggest').innerHTML =
+    `In base alla rotazione A → B → C, la prossima seduta consigliata è <b style="color:var(--accent)">Scheda ${next}</b>.`;
+}
+
+// ---------------- RENDER: SCHEDA ----------------
+function renderSchedaSwitcher(){
+  document.getElementById('schedaSwitcher').innerHTML = ORDER.map(k =>
+    `<div class="scheda-pill ${k===currentScheda ? 'on':''}" onclick="goToScheda('${k}')">Scheda ${k}</div>`
+  ).join('');
+}
+function renderScheda(){
+  renderSchedaSwitcher();
+  const data = SCHEDE[currentScheda];
+  document.getElementById('schedaTitle').textContent = data.title;
+  document.getElementById('exerciseList').innerHTML = data.exercises.map(ex => {
+    const last = lastWeightFor(ex.id);
+    const lastLabel = last ? `Ultima: ${last.weight}${ex.unit==='sec'?'"':ex.unit==='-'?'':' kg'}${last.reps ? ' x '+last.reps : ''}` : 'Nessun dato';
+    return `
+    <div class="exercise">
+      <div class="ex-head">
+        <div>
+          <div class="ex-name">${ex.name}</div>
+          <div class="ex-target">${ex.target}</div>
+        </div>
+        <div class="ex-last">${lastLabel}</div>
+      </div>
+      <div class="ex-inputs">
+        <div class="field">
+          <label>${ex.unit === 'sec' ? 'Secondi' : ex.unit === '-' ? 'Peso/Note' : 'Peso (kg)'}</label>
+          <input type="number" inputmode="decimal" id="w_${ex.id}" placeholder="${last ? last.weight : '-'}">
+        </div>
+        <div class="field">
+          <label>Ripetizioni</label>
+          <input type="number" inputmode="numeric" id="r_${ex.id}" placeholder="${last && last.reps ? last.reps : '-'}">
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('sessionNote').value = '';
+}
+function goToScheda(id){ currentScheda = id; switchTab('scheda'); renderScheda(); }
+
+function saveSession(){
+  const data = SCHEDE[currentScheda];
+  const entries = {};
+  let any = false;
+  data.exercises.forEach(ex => {
+    const w = document.getElementById('w_'+ex.id).value;
+    const r = document.getElementById('r_'+ex.id).value;
+    if(w || r){ any = true; entries[ex.id] = { weight: w ? parseFloat(w) : null, reps: r ? parseInt(r) : null }; }
+  });
+  const note = document.getElementById('sessionNote').value.trim();
+  sessions.push({ id: 'sess_' + Date.now(), date: new Date().toISOString(), scheda: currentScheda, note, entries });
+  persistSessions();
+  showToast(any ? "✓ Allenamento salvato" : "✓ Sessione registrata");
+  renderScheda(); renderHome();
+}
+
+// ---------------- RENDER: STORICO ----------------
+function renderStorico(){
+  const el = document.getElementById('historyList');
+  if(sessions.length === 0){
+    el.innerHTML = '<div class="empty">Nessun allenamento registrato ancora.<br>Vai su "Allena" per iniziare.</div>';
+    return;
+  }
+  const sorted = [...sessions].sort((a,b) => new Date(b.date) - new Date(a.date));
+  el.innerHTML = sorted.map(s => {
+    const count = Object.keys(s.entries || {}).length;
+    return `
+    <div class="session-item">
+      <div>
+        <div class="session-date">${fmtDate(s.date)}</div>
+        <div class="session-meta">${count} esercizi registrati${s.note ? ' · ' + s.note : ''}</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <div class="session-badge">Scheda ${s.scheda}</div>
+        <div class="delete-x" onclick="deleteSession('${s.id}')">Elimina</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function deleteSession(id){
+  sessions = sessions.filter(s => s.id !== id);
+  persistSessions();
+  renderStorico(); renderHome();
+}
+
+// ---------------- TABS ----------------
+function switchTab(tab){
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('view-' + tab).classList.add('active');
+  document.querySelector(`.tab[data-tab="${tab}"]`).classList.add('active');
+  if(tab === 'storico') renderStorico();
+  if(tab === 'home') renderHome();
+  if(tab === 'scheda') renderScheda();
+}
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+// ---------------- INSTALL BANNER ----------------
+function isStandalone(){
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+
+// ---------------- INIT ----------------
+function init(){
+  document.getElementById('todayDate').textContent = new Date().toLocaleDateString('it-IT', {weekday:'short', day:'numeric', month:'short'});
+  loadSessions();
+  currentScheda = nextScheda();
+  renderHome();
+  renderScheda();
+  if(!isStandalone()) document.getElementById('installBanner').style.display = 'block';
+
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('sw.js').catch(err => console.warn('SW registration failed', err));
+  }
+}
+init();
+</script>
+</body>
+</html>
