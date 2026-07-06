@@ -78,10 +78,30 @@
 
   .exercise{ border-bottom:1px solid var(--border); padding:14px 0; }
   .exercise:last-child{ border-bottom:none; }
-  .ex-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:8px;}
+  .ex-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px;}
+  .ex-icon{
+    width:64px; height:64px; flex:none; background:var(--card-2); border:1px solid var(--border);
+    border-radius:10px; overflow:hidden; position:relative; display:block; text-decoration:none;
+  }
+  .ex-icon img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .ex-icon .play-badge{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    background:rgba(0,0,0,0.15);
+  }
+  .ex-icon .play-badge span{
+    width:22px; height:22px; border-radius:50%; background:rgba(20,24,28,0.75);
+    display:flex; align-items:center; justify-content:center; color:var(--accent); font-size:10px;
+  }
+  .ex-info{ flex:1; min-width:0; }
   .ex-name{ font-weight:700; font-size:15px; line-height:1.3; }
   .ex-target{ color:var(--muted); font-size:12px; font-family:var(--mono); margin-top:2px;}
+  .ex-right{ display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex:none; }
   .ex-last{ color: var(--accent); font-size:11px; font-family:var(--mono); text-align:right; white-space:nowrap;}
+  .ex-video{
+    font-size:11px; font-weight:700; color:var(--text); text-decoration:none; white-space:nowrap;
+    background:var(--card-2); border:1px solid var(--border); padding:4px 8px; border-radius:8px;
+  }
+  .ex-video:active{ background:var(--accent-dim); }
 
   .ex-inputs{ display:flex; gap:8px; margin-top:10px; }
   .field{ flex:1; }
@@ -200,29 +220,29 @@
 // ---------------- DATA ----------------
 const SCHEDE = {
   A: { title: "Scheda A — Gambe + Push + Core", exercises: [
-      {id:"a1", name:"Leg press (o squat multipower)", target:"4 x 10-12", unit:"kg"},
-      {id:"a2", name:"Panca piana bilanciere/manubri", target:"4 x 8-10", unit:"kg"},
-      {id:"a3", name:"Leg curl seduto/sdraiato", target:"3 x 12", unit:"kg"},
-      {id:"a4", name:"Lat machine avanti (presa larga)", target:"3 x 10-12", unit:"kg"},
-      {id:"a5", name:"Cable crunch", target:"3 x 15", unit:"kg"},
-      {id:"a6", name:"Plank frontale", target:"3 x 30-45\"", unit:"sec"},
+      {id:"a1", name:"Leg press (o squat multipower)", target:"4 x 10-12", unit:"kg", videoId:"wDVleuqvQKo"},
+      {id:"a2", name:"Panca piana bilanciere/manubri", target:"4 x 8-10", unit:"kg", videoId:"NtWbQxbg84s"},
+      {id:"a3", name:"Leg curl seduto/sdraiato", target:"3 x 12", unit:"kg", videoId:"4H3v2ThqiYY"},
+      {id:"a4", name:"Lat machine avanti (presa larga)", target:"3 x 10-12", unit:"kg", videoId:"UO3A0HF2AWw"},
+      {id:"a5", name:"Cable crunch", target:"3 x 15", unit:"kg", videoId:"9zOEVUFcLMs"},
+      {id:"a6", name:"Plank frontale", target:"3 x 30-45\"", unit:"sec", videoId:"uefcn2Enyas"},
   ]},
   B: { title: "Scheda B — Catena posteriore + Trazioni + Core", exercises: [
-      {id:"b1", name:"Hip thrust con bilanciere", target:"4 x 10-12", unit:"kg"},
-      {id:"b2", name:"Lat machine / trazioni", target:"4 x 8-10", unit:"kg"},
-      {id:"b3", name:"Affondi con manubri", target:"3 x 10/gamba", unit:"kg"},
-      {id:"b4", name:"Rematore bilanciere panca inclinata", target:"3 x 10-12", unit:"kg"},
-      {id:"b5", name:"Pallof press al cavo", target:"3 x 10/lato", unit:"kg"},
-      {id:"b6", name:"Plank laterale", target:"3 x 25-35\"", unit:"sec"},
+      {id:"b1", name:"Hip thrust con bilanciere", target:"4 x 10-12", unit:"kg", videoId:"IHk9Qn8ttX8"},
+      {id:"b2", name:"Lat machine / trazioni", target:"4 x 8-10", unit:"kg", videoId:"oN7zZJd4KnI"},
+      {id:"b3", name:"Affondi con manubri", target:"3 x 10/gamba", unit:"kg", videoId:"b0XC4jBR3zM"},
+      {id:"b4", name:"Rematore bilanciere panca inclinata", target:"3 x 10-12", unit:"kg", videoId:"tFt6Q-wfQjI"},
+      {id:"b5", name:"Pallof press al cavo", target:"3 x 10/lato", unit:"kg", videoId:"qQOsWutOQoM"},
+      {id:"b6", name:"Plank laterale", target:"3 x 25-35\"", unit:"sec", videoId:"LqZwLDnPvsA"},
   ]},
   C: { title: "Scheda C — Full body + Stabilità lombare", exercises: [
-      {id:"c1", name:"Stacco rumeno (RDL)", target:"4 x 8-10", unit:"kg"},
-      {id:"c2", name:"Shoulder press manubri", target:"3 x 10-12", unit:"kg"},
-      {id:"c3", name:"Lat machine stretta / rematore basso", target:"3 x 10-12", unit:"kg"},
-      {id:"c4", name:"Curl bicipiti", target:"3 x 12", unit:"kg"},
-      {id:"c5", name:"Push down tricipiti", target:"3 x 12", unit:"kg"},
-      {id:"c6", name:"Dead bug con zavorra", target:"3 x 10/lato", unit:"kg"},
-      {id:"c7", name:"Ab wheel / crunch inverso", target:"3 x 10-12", unit:"-"},
+      {id:"c1", name:"Stacco rumeno (RDL)", target:"4 x 8-10", unit:"kg", videoId:"Rki1bVYxHok"},
+      {id:"c2", name:"Shoulder press manubri", target:"3 x 10-12", unit:"kg", videoId:"fkW9CxGN4pk"},
+      {id:"c3", name:"Lat machine stretta / rematore basso", target:"3 x 10-12", unit:"kg", videoId:"rAnKvGd0rhE"},
+      {id:"c4", name:"Curl bicipiti", target:"3 x 12", unit:"kg", videoId:"1Qp04kK-k6U"},
+      {id:"c5", name:"Push down tricipiti", target:"3 x 12", unit:"kg", videoId:"gQuAM7Wzp74"},
+      {id:"c6", name:"Dead bug con zavorra", target:"3 x 10/lato", unit:"kg", videoId:"5Y4MDZWsBQw"},
+      {id:"c7", name:"Ab wheel / crunch inverso", target:"3 x 10-12", unit:"-", videoId:"wySNVHerCS8"},
   ]}
 };
 const ORDER = ["A","B","C"];
@@ -328,14 +348,23 @@ function renderScheda(){
   document.getElementById('exerciseList').innerHTML = data.exercises.map(ex => {
     const last = lastWeightFor(ex.id);
     const lastLabel = last ? `Ultima: ${last.weight}${ex.unit==='sec'?'"':ex.unit==='-'?'':' kg'}${last.reps ? ' x '+last.reps : ''}` : 'Nessun dato';
+    const videoUrl = `https://www.youtube.com/watch?v=${ex.videoId}`;
+    const thumbUrl = `https://img.youtube.com/vi/${ex.videoId}/mqdefault.jpg`;
     return `
     <div class="exercise">
       <div class="ex-head">
-        <div>
+        <a class="ex-icon" href="${videoUrl}" target="_blank" rel="noopener">
+          <img src="${thumbUrl}" alt="${ex.name}" loading="lazy">
+          <div class="play-badge"><span>▶</span></div>
+        </a>
+        <div class="ex-info">
           <div class="ex-name">${ex.name}</div>
           <div class="ex-target">${ex.target}</div>
         </div>
-        <div class="ex-last">${lastLabel}</div>
+        <div class="ex-right">
+          <div class="ex-last">${lastLabel}</div>
+          <a class="ex-video" href="${videoUrl}" target="_blank" rel="noopener">▶ Video</a>
+        </div>
       </div>
       <div class="ex-inputs">
         <div class="field">
